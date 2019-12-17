@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <style>
+        .title {
+            text-align: center;
+            color: #3897f0;
+            font-family: 'URW Chancery L', cursive;
+            font-size: 14px;
+            font-style: italic;
+            color: #ffffff;
+        }
+        .profile_image{
+            width:150px;
+            height:150px;
+            border-radius: 50%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .number{
+            text-align: center;
+            top: 50%;
+        }
+        #addFriend {
+            background-color: #007bff;
+            color: white;
+        }
+        img {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            width: 150px;
+        }
+
+        img:hover {
+            box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+        }
+    </style>
+</head>
+<body style="background-color: whitesmoke;">
+{% extends 'Momentgram/base.html' %}
+{% block content %}
+{% load static %}
+<div class="posts_placer row" style="padding: 10px 150px">
+
+    {% if posts%}
+        {% for post in posts %}
+        <div class="col-12" style="background-color: white; padding: 10px;">
+            <div class="posts_placer row" style="padding: 10px 150px">
+                <div class="col-1" style=""></div>
+                <div class="container1 col-10" style="">
+                    <p>
+                        <img style="width: 50px; border-radius: 100%;" src="https://st2.depositphotos.com/1003591/7970/i/950/depositphotos_79702338-stock-photo-potato-with-funny-face.jpg"/>
+                        <a href="{% url 'show_profile' post.user.username %}">{{ post.user.username }}</a>
+                    </p>
+                    <img style="width: 100%; border-radius: 8px;" src="/media/{{post.image}}"/>
+                    <p>{{post.description}}</p>
+                    <p style="font-size: 10px">{{post.date}}</p>
+                </div>
+                <div class="col-1" style=""></div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="login-container">
+            <h1 style="margin-top: 2%; margin-left: 20%; color: rgba(0, 0, 0, 0.6); font-size: 30px;">Follow people to see exciting posts!</h1>
+        </div>
+    {% endif %}
+
+
+</div><div class="center">
+    <div class="pagination">
+        {% for index in maxPage %}
+        <a href="{% url 'full_timeline' index %}">{{index}}</a>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+</body>
+<script>
+    if (false) { // case user same as profile page owner
+        $("#follow-btn").attr("style","display:none");
+        // $("#follow-btn").attr("class","btn btn-secondary");
+        // document.getElementById("follow-btn").innerHTML = '+ Add Post';
+    }
+    if (false) { // case user already followed
+        $("#follow-btn").attr("class","btn btn-light");
+        document.getElementById("follow-btn").innerHTML = 'Unfollow';
+    }
+</script>
+</html>

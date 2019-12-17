@@ -11,7 +11,6 @@ from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.core.paginator import Paginator
 from .utils import *
-from django.http import JsonResponse
 
 
 def index(request):
@@ -27,33 +26,11 @@ def entry(request):
 def view_post(request, id=None):
     if id and getPost(id):
         post = getPost(id)
-        if request.method == 'POST':
-            comment = request.POST.get('comment')
-            createComment(request.user,post,comment)
-            comments = getPostComments(post)
-            comments = [(x, getProfile(x.user).image) for x in comments]
-            context ={
-                'username' : post.user.username,
-                'description' : post.description,
-                'image_name' : post.image,
-                'date' : post.date,
-                'id' : post.id,
-                'comments' : comments,
-                'nlike' : getNumberOfLikes(post),
-                'isLikeable' : isLikeable(request.user, post)
-            }
-            return redirect('view_post', id)
-        comments = getPostComments(post)
-        comments = [(x, getProfile(x.user).image) for x in comments]
         context ={
             'username' : post.user.username,
             'description' : post.description,
             'image_name' : post.image,
-            'date' : post.date,
-            'id' : post.id,
-            'comments' : comments,
-            'nlike' : getNumberOfLikes(post),
-            'isLikeable' : isLikeable(request.user, post)
+            'date' : post.date
         }
         return render(request, 'Momentgram/post_visualization.html', context)
     return HttpResponse("No such post")
@@ -110,6 +87,7 @@ def log_out(request):
 @login_required
 def publish_post(request):
     if request.method == 'POST':
+        image_name = request.FILES['image'].name
         image = request.FILES['image']
         description = request.POST.get('description')
         post = createPost(description, request.user, image)
@@ -119,7 +97,7 @@ def publish_post(request):
             'image_name' : post.image,
             'date' : post.date
         }
-        return redirect('view_post', post.id)
+        return render(request, 'Momentgram/post_visualization.html', context)
     if request.method == 'GET':
         return render(request, 'Momentgram/post.html')
 
@@ -150,8 +128,7 @@ def show_profile(request, username, index = 1):
          'fullName' : user.first_name + " " + user.last_name,
          'posts' : p.page(page),
          'maxPage' : [ x+1 for x in range(maxPage)],
-         'index' : index,
-         'image' : getProfile(user).image
+         'index' : index
     }
     return render(request, 'Momentgram/profile.html', context)
 
@@ -213,52 +190,16 @@ def manage_friend(request, username, index = 1):
                     'maxPage' : [ x+1 for x in range(maxPage)],
                     'index' : index
                 }
-        return redirect('show_profile_complete', username, index)
+        return render(request, 'Momentgram/profile.html', context)
     else:
         return HttpResponse("No such user")
 
-def manage_friends(request, username):
-    user = getUser(username)
-    if user:
-        if request.user in getFollowers(user):
-            unfollow(request.user,user)
-            followed = False
-        else:
-            follow(request.user, user)
-            followed = True
-        context ={
-            'followed' : followed,
-            'n_followers' : len(getFollowers(user))
-        }
-        return JsonResponse(context)
-    else:
-        return JsonResponse()
-@login_required
-def manage_like(request, id):
-    post = getPost(id)
-    if post:
-        if isLikeable(request.user,post):
-            liked = True
-            createLike(request.user,post)
-        else:
-            liked = False
-            unlike(request.user,post)
-        nlikes = getNumberOfLikes(post)
-        context ={
-            'nlikes' : nlikes,
-            'liked' : liked
-        }
 
-        return JsonResponse(context)
-    else:
-        return JsonResponse()
-
-@login_required
 def search_users(request, isProfile='0', searched ="", index = 1):
     if 'searched' in request.GET:
         searched = request.GET.get('searched')
     sorted = getUsersSorted(request.user, searched)
-    users = [(x, getProfile(x).image) for x in sorted if x.username != request.user.username]
+    users = [x.username for x in sorted if x.username != request.user.username]
     p = Paginator(users, 9)
     maxPage = p.num_pages
     page = index
@@ -275,62 +216,27 @@ def search_users(request, isProfile='0', searched ="", index = 1):
             'maxPage' : [ x+1 for x in range(maxPage)],
             'searched' : searched
         }
+
     return render(request, 'Momentgram/searchUsers.html', context)
 
-@login_required
-def get_users(request,username):
-    sorted = [(x.username,x.get_full_name()) for x in getUsersSorted(request.user, '') if x.username != request.user.username]
-    dicts = []
-    for element in sorted:
-        dicts.append({"username":element[0],"name":element[1],"image":getProfile(getUser(element[0])).image.name})
-    response = {
-        'users': dicts
-    }
-    return JsonResponse(response)
-
-@login_required
 def timeline(request, index = 1):
     if request.method == "GET":
         posts = getTimeline(request.user)
-        posts = [(post,getNumberOfLikes(post),isLikeable(request.user,post),getProfile(post.user).image) for post in posts]
         p = Paginator(posts, 9)
+        print(p.num_pages)
         maxPage = p.num_pages
         context = {
             'posts' : p.page(index),
             'maxPage' : [ x+1 for x in range(maxPage)],
-            'index' : index,
-
+            'index' : index
         }
         return render(request, 'Momentgram/timeline.html', context)
 
-@login_required
-def edit_profile(request):
-    if request.method == "POST":
-        fname = request.POST.get("firstname")
-        lname = request.POST.get("lastname")
-        bio = request.POST.get("bio")
-        pword = request.POST.get("password")
-        if 'image' in request.FILES:
-            image = request.FILES['image']
-            updateUser(request.user, fname, lname, pword, bio, image)
-        else:
-            updateUser(request.user, fname, lname, pword, bio)
-        return redirect('show_profile', request.user.username)
-    context = {
-        'firstname' : request.user.first_name,
-        'lastname' : request.user.last_name,
-        'bio' : getProfile(request.user).bio,
-        'image' : getProfile(request.user).image
-    }
-    return render(request, 'Momentgram/editProfile.html', context)
-
-@login_required
 def chat( request, username=""):
     if username:
         if( request.method == 'GET' ):
             user = getUser(username)
             messages = getChat(request.user, user)
-            messages = [(x, getProfile(x.sender).image) for x in messages]
             if(len(messages)>30):
                 start = len(messages) - 30
             else:
@@ -348,7 +254,6 @@ def chat( request, username=""):
             if message:
                 sendMessage(request.user,user,message)
             messages = getChat(request.user, user)
-            messages = [(x, getProfile(x.sender).image) for x in messages]
             if(len(messages)>30):
                 start = len(messages) - 30
             else:
@@ -357,10 +262,9 @@ def chat( request, username=""):
                 'username' : username,
                 'messages' : messages[start:]
             }
-            return redirect( 'chat', user.username)
+            return render( request, 'Momentgram/chat.html', context)
     else:
         return HttpResponse("No such user")
-
 
 
 

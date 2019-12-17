@@ -1,0 +1,46 @@
+{% extends 'Momentgram/base.html' %}
+{% block content %}
+
+{% load static %}
+<div >    
+    <div style="margin-bottom: 10px;">
+  	{% if users%}
+     {% for user in users %}
+        <div class="login-container" style="margin-top: 20px;">
+            
+            <div class="container1">
+                {% if isProfile %}
+                    <a href="{% url 'show_profile' user %}" style="text-align: center"><p>{{user}} </p></a>
+                {% else %}
+                    <a href="{% url 'chat' user %}" style="text-align: center"><p>{{user}} </p></a>
+                {% endif %}
+            </div>
+        </div>         
+      {% endfor %}
+    {% else %}
+
+        <div class="login-container">
+            <h1 style="margin-top: 2%; margin-left: 20%; color: rgba(0, 0, 0, 0.6); font-size: 30px;">No matched users.</h1>
+        </div>
+      {% endif %}
+
+     </div>
+    
+    <div class="center">
+        <div class="pagination">
+        {% for index in maxPage %}
+            {% if isProfile %}
+                <a href="{% url 'search_users_complete' 1 searched index %}">{{index}}</a>
+            {% else %}
+                <a href="{% url 'search_users_complete' 0 searched index %}">{{index}}</a>
+            {% endif %}
+        {% endfor %}
+        </div>
+    </div>
+    
+
+</div>
+<script>
+ 
+</script>
+{% endblock %}
