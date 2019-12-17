@@ -17,9 +17,8 @@
             color: #ffffff;
         }
         .profile_image{
-            width:150px;
             height:150px;
-            border-radius: 50%;
+            border-radius: 8px;
             display: block;
             margin-left: auto;
             margin-right: auto;
@@ -36,7 +35,6 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             padding: 5px;
-            width: 150px;
         }
 
         img:hover {
@@ -48,15 +46,19 @@
 {% extends 'Momentgram/base.html' %}
 {% block content %}
 {% load static %}
+{% load cloudinary %}
 <div class="row" style="padding: 10px 150px">
     <div class="col-4" style="background-color: white; padding: 10px;">
-        <img id="image" class="profile_image" src="https://cdn3.iconfinder.com/data/icons/avatars-15/64/_Bearded_Man-17-512.png"/>
+        <img id="image" class="profile_image" src="{% cloudinary image %}/"/>
     </div>
     <div class="col-2" style="background-color: white; padding: 20px">
         <p id="fullName" style="font-size: 14px; font-weight: bold">{{ fullName }}</p>
         <p id="coment" style="font-size: 12px">{{ description }}</p>
         <p id="userName" style="font-size: 12px">{{ username }}</p>
         {% if yourProfile%}
+                <a href="{% url 'editProfile' %}">
+                    <button id="follow-btn" type="button" class="btn btn-primary" >Edit Profile</button>
+                </a>
         {% else %}
             {% if followed%}
                 <a href="{% url 'manage_complete' username index %}">
@@ -87,9 +89,9 @@
     {% if posts%}
         {% for post in posts %}
         <div class="col-4" style="background-color: white; padding: 10px;">
-            <div class="container1">
-                <a href="{% url 'view_post' post.id %}">
-                    <img  style="width: 100%; max-height: 500px; border-radius: 8px;" src="/media/{{post.image}}/" href="{% url 'view_post' post.id %}"/>
+            <div class="container1" style="text-align: center">
+                <a href="{% url 'view_post' post.id %}" >
+                    <img  style="height: 200px; border-radius: 8px; padding-left:auto; padding-right: auto;" src="{% cloudinary post.image %}/" href="{% url 'view_post' post.id %}"/>
                 </a>
             </div>
         </div>

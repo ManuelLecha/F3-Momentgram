@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <style>
+        .title {
+            text-align: center;
+            color: #3897f0;
+            font-family: 'URW Chancery L', cursive;
+            font-size: 14px;
+            font-style: italic;
+            color: #ffffff;
+        }
+        .profile_image{
+            width:150px;
+            height:150px;
+            border-radius: 50%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .number{
+            text-align: center;
+            top: 50%;
+        }
+        #addFriend {
+            background-color: #007bff;
+            color: white;
+        }
+        img {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+        }
+
+        img:hover {
+            box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+        }
+
+        .button:focus {
+            outline: 0px dotted !important;
+        }
+
+
+
+        .button-like {
+          border: 2px solid #8a8a8a;
+          background-color: transparent;
+          text-decoration: none;
+          padding: 1rem;
+          position: relative;
+          vertical-align: middle;
+          text-align: center;
+          display: inline-block;
+          border-radius: 3rem;
+          color: #8a8a8a;
+          transition: all ease 0.4s;
+        }
+
+        .button-like span {
+          margin-left: 0.5rem;
+        }
+
+        .button-like .fa,
+        .button-like span {
+          transition: all ease 0.4s;
+        }
+
+        .button-like:focus {
+          background-color: transparent;
+        }
+
+        .button-like:focus .fa,
+        .button-like:focus span {
+          color: #8a8a8a;
+        }
+
+        .button-like:hover {
+          border-color: #cc4b37;
+          background-color: transparent;
+        }
+
+        .button-like:hover .fa,
+        .button-like:hover span {
+          color: #cc4b37;
+        }
+
+        .liked {
+          background-color: #cc4b37;
+          border-color: #cc4b37;
+        }
+
+        .liked .fa,
+        .liked span {
+          color: #fefefe;
+        }
+
+        .liked:focus {
+          background-color: #cc4b37;
+        }
+
+        .liked:focus .fa,
+        .liked:focus span {
+          color: #fefefe;
+        }
+
+        .liked:hover {
+          background-color: #cc4b37;
+          border-color: #cc4b37;
+        }
+
+        .liked:hover .fa,
+        .liked:hover span {
+          color: #fefefe;
+        }
+
+
+    </style>
+</head>
+<body style="background-color: whitesmoke;">
+{% extends 'Momentgram/base.html' %}
+{% block content %}
+{% load static %}
+{% load cloudinary %}
+<div class="posts_placer row" style="padding: 10px 150px">
+
+    {% if posts%}
+        {% for post, nlike, isLikeable, user_image in posts %}
+        <div class="col-12" style="background-color: white; padding: 10px;">
+            <div class="posts_placer row" style="padding: 10px 150px">
+                <div class="col-1" style=""></div>
+                <div class="container1 col-10" style="">
+                    <p>
+                        <img style="width: 50px; border-radius: 10px" src="{% cloudinary user_image %}"/>
+                        <a href="{% url 'show_profile' post.user.username %}">{{ post.user.username }}</a>
+                    </p>
+                    <div style="text-align: center">
+                        <a href="{% url 'view_post' post.id %}">
+                            <img style="max-height: 500px; border-radius: 8px;" src="{% cloudinary post.image %}"/>
+                        </a>
+                    </div>
+                    <p>{{post.description}}</p>
+                    <p style="font-size: 10px">{{post.date}}</p>
+
+                    {% if isLikeable %}
+                        <button class="button button-like" onclick="likeFunction(this)" id="{{post.id}}">
+                          <i class="fa fa-heart"></i>
+                          <span >Like</span>
+                            <span id="{{post.id}}n"> {{nlike}}</span>
+                        </button>
+                    {% else %}
+                        <button class="button button-like liked" onclick="likeFunction(this)" id="{{post.id}}">
+                            <i class="fa fa-heart"></i>
+                            <span >Like</span>
+                            <span id="{{post.id}}n"> {{nlike}}</span>
+                        </button>
+                    {% endif %}
+
+
+
+
+                </div>
+                <div class="col-1" style=""></div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="login-container">
+            <h1 style="margin-top: 2%; margin-left: 20%; color: rgba(0, 0, 0, 0.6); font-size: 30px;">Follow people to see exciting posts!</h1>
+        </div>
+    {% endif %}
+
+
+</div><div class="center">
+    <div class="pagination">
+        {% for index in maxPage %}
+        <a href="{% url 'full_timeline' index %}">{{index}}</a>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function likeFunction(x) {
+      if (x.classList.contains("liked")){
+        x.classList.remove("liked");
+      }else{
+        x.classList.add("liked");
+      }
+        $.ajax({
+            url: '../manage_like/'+x.id+"/",
+            data: {
+            },
+            dataType: 'json',
+            success: function (data) {
+                document.getElementById(x.id+"n").innerText = data.nlikes;
+            }
+        });
+    }
+    
+</script>
+
+{% endblock %}
+</body>
+
+</html>

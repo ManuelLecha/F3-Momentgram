@@ -20,9 +20,9 @@
         }
         .head {
             width: 100%;
-            background-color: #c4c4c4;
+            background-color: #3897f0;
             height: 5%;
-            border: 1px solid grey;
+            border: 1px solid #2c63a8;
             text-align: center;
             font-size: 20px;
             padding: 10px 0;
@@ -36,28 +36,31 @@
             overflow-y: auto;
             background-color: white;
             height: 80%;
-            border: 1px solid grey;
+            border: 1px solid #2c63a8;
             text-align: center;
             font-size: 20px;
             font-family: Lucida Console;
+
         }
         .send {
             width: 100%;
             min-height: 50px;
             background-color: white;
             height: 15%;
-            border: 1px solid grey;
+            border: 1px solid #2c63a8;
             text-align: center;
             font-family: Lucida Console;
             border-radius: 0 0 5px 5px;
+            border-top: 0;
         }
         .send-button{
             color: #3897f0;
             height: 35px;
+            width: 20%;
         }
         .message-input{
-            width: 80%;
-            border: 1px solid grey;
+            width: 70% !important;
+            border: 1px solid #2c63a8;
             border-radius: 5px;
             height: 90%;
             padding: 9px;
@@ -78,10 +81,10 @@
             box-shadow: 2px 2px grey;
             padding: 5px;
             overflow-x: auto;
-            background-color: dimgrey;
+            background-color: whitesmoke;
             float: right;
             width: 46%;
-            color: lawngreen;
+            color: #323232;
             border-radius: 3px;
         }
         .receivedMessage {
@@ -91,7 +94,7 @@
             width: 60%;
             background-color: lightgrey;
             position: relative;
-            color: #3897f0;
+            color: #323232;
             max-width: 400px;
             border-radius: 3px;
         }
@@ -102,13 +105,13 @@
 {% block content %}
 
 {% load static %}
-<div style="background-color: white;">
+<div>
     <div class="chat">
         <div class="head">
            Chat with {{username}}
         </div>
         <div class="messages" id="messages">
-            {% for message in messages %}
+            {% for message, image in messages %}
                 {% if message.sender.username == user.username %}
                 <div class="messageContainer">
                     <div class="ownMessage">
@@ -118,7 +121,7 @@
                 {% else %}
                 <div class="messageContainer">
                     <div class="receivedMessage">
-                        <img style="width: 50px; border-radius: 100%;" src="https://st2.depositphotos.com/1003591/7970/i/950/depositphotos_79702338-stock-photo-potato-with-funny-face.jpg">
+                        <img style="width: 50px; border-radius: 2px;" src="/media/{{image}}">
                         {{message.text}}
                     </div>
                 </div>
@@ -129,7 +132,7 @@
             <form action="{% url 'chat' username %}" method="POST" style="border: none" class="send">
                 {% csrf_token %}
                 <input type="text" placeholder="TypeMessage" name="message" class="message-input">
-                <button type="submit" class="btn btn-primary send-button">Send</button>
+                <button type="submit" class="btn btn-primary send-button" disabled="disabled">Send</button>
             </form>
         </div>
     </div>
@@ -139,12 +142,16 @@
         var objDiv = document.getElementById("messages");
         objDiv.scrollTop = objDiv.scrollHeight;
     }
-    $('.message-input').onkeyup(function(){
-        if(this.innerText.length != 0){
-            $('.message-input').setProperty("disabled","");
-        }
-        else {
-            $('.message-input').setProperty("disabled","disabled");
+    $(document).ready(function(){
+        let inputs = document.querySelectorAll('.message-input'),
+            knapp = document.querySelector('.send-button')
+        knapp.disabled = true
+        for (i = 0; i < inputs.length; i++) {
+            inputs[i].addEventListener('input',() => {
+                let values = []
+                inputs.forEach(v => values.push(v.value))
+                knapp.disabled = values.includes('')
+            })
         }
     });
 </script>

@@ -1,0 +1,281 @@
+{% extends 'Momentgram/base.html' %}
+{% block content %}
+{% load cloudinary %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<div>
+     <!--<div class="row" style="padding: 10px 150px">
+        <div class="col-8" style="background-color: white; padding: 10px;">
+            <img id="image" style=" max-width: 100%;" src="/media/{{image_name}}/"/>
+        </div>
+        <div class="col-4" style="background-color: white; padding: 20px">
+            <p id="userName" style="font-size: 14px; font-weight: bold">{{ username }}</p>
+            <p id="coment" style="font-size: 12px">{{ description }}</p>
+            <p id="date" style="font-size: 10px">{{ date }}</p>
+        </div>
+    </div>-->
+    <div class="row" style="padding: 10px 150px">
+        <div class="col-6" style="background-color: white; padding: 10px; text-align: center;">
+            <img id="image" style=" max-width: 100%; max-height: 400px;" src="{% cloudinary image_name %}/"/>
+            {% if isLikeable %}
+            <button class="button button-like" onclick="likeFunction(this)" id="{{id}}">
+                <i class="fa fa-heart"></i>
+                <span >Like</span>
+                <span id="{{id}}n"> {{nlike}}</span>
+            </button>
+            {% else %}
+            <button class="button button-like liked" onclick="likeFunction(this)" id="{{id}}">
+                <i class="fa fa-heart"></i>
+                <span >Like</span>
+                <span id="{{id}}n"> {{nlike}}</span>
+            </button>
+            {% endif %}
+        </div>
+        <div class="col-6" style="background-color: white; padding: 20px; border-left: 3px solid whitesmoke;">
+            <p id="userName" style="font-size: 14px; font-weight: bold">{{username}}</p>
+            <p id="comment" style="font-size: 12px">{{description}}</p>
+            <p id="date" style="font-size: 10px">{{date}}</p>
+            <div class="comments" style="max-height: 400px; width: 500px; overflow-x: hidden">
+                <div>
+                    <div class="row" style="width:90%;">
+                        <div class="col-12">
+                            <h2 class="page-header">Comments</h2>
+                            <section class="comment-list">
+                                <!-- First Comment -->
+                                {% for comment, image in comments %}
+                                <article class="row">
+                                    <div class="col-md-2 col-sm-2 hidden-xs">
+                                        <figure class="thumbnail">
+                                            <img class="img-responsive" src="{% cloudinary image %}/" />
+                                        </figure>
+                                    </div>
+                                    <div>
+                                        <div class="panel panel-default arrow left">
+                                            <div class="panel-body">
+                                                <header class="text-left">
+                                                    <div class="comment-user"><i class="fa fa-user"></i> {{user.first_name}} {{user.last_name}} </div>
+                                                    <time class="comment-date" datetime="16-12-2014 01:05"><i class="fa fa-clock-o"></i> {{comment.date}}</time>
+                                                </header>
+                                                <div class="comment-post">
+                                                    <p>{{comment.comment}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                                {% endfor %}
+                            </section>
+                            <div class="send">
+                                <form action="" method="POST" style="border: none" class="send">
+                                    {% csrf_token %}
+                                    <input type="text" placeholder="Type comment" name="comment" class="message-input">
+                                    <button type="submit" class="btn btn-primary send-button" disabled="disabled">Send</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        let inputs = document.querySelectorAll('.message-input'),
+            knapp = document.querySelector('.send-button')
+        knapp.disabled = true
+        for (i = 0; i < inputs.length; i++) {
+            inputs[i].addEventListener('input',() => {
+                let values = []
+                inputs.forEach(v => values.push(v.value))
+                knapp.disabled = values.includes('')
+            })
+        }
+    });
+</script>
+<style>
+    .comments {
+        height: auto;
+        overflow-x: auto;
+    }
+    /*font Awesome http://fontawesome.io*/
+    @import url(//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css);
+    /*Comment List styles*/
+    .comment-list .row {
+        margin-bottom: 0px;
+    }
+    .comment-list .panel .panel-heading {
+        padding: 4px 15px;
+        position: absolute;
+        border:none;
+        /*Panel-heading border radius*/
+        border-top-right-radius:0px;
+        top: 1px;
+    }
+    .comment-list .panel .panel-heading.right {
+        border-right-width: 0px;
+        /*Panel-heading border radius*/
+        border-top-left-radius:0px;
+        right: 16px;
+    }
+    .comment-list .panel .panel-heading .panel-body {
+        padding-top: 6px;
+    }
+    .comment-list figcaption {
+        /*For wrapping text in thumbnail*/
+        word-wrap: break-word;
+    }
+    /* Portrait tablets and medium desktops */
+    @media (min-width: 768px) {
+        .comment-list .arrow:after, .comment-list .arrow:before {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-color: transparent;
+        }
+        .comment-list .panel.arrow.left:after, .comment-list .panel.arrow.left:before {
+            border-left: 0;
+        }
+        /*****Left Arrow*****/
+        /*Outline effect style*/
+        .comment-list .panel.arrow.left:before {
+            left: 0px;
+            top: 30px;
+            /*Use boarder color of panel*/
+            border-right-color: inherit;
+            border-width: 16px;
+        }
+        /*Background color effect*/
+        .comment-list .panel.arrow.left:after {
+            left: 1px;
+            top: 31px;
+            /*Change for different outline color*/
+            border-right-color: #FFFFFF;
+            border-width: 15px;
+        }
+        /*****Right Arrow*****/
+        /*Outline effect style*/
+        .comment-list .panel.arrow.right:before {
+            right: -16px;
+            top: 30px;
+            /*Use boarder color of panel*/
+            border-left-color: inherit;
+            border-width: 16px;
+        }
+        /*Background color effect*/
+        .comment-list .panel.arrow.right:after {
+            right: -14px;
+            top: 31px;
+            /*Change for different outline color*/
+            border-left-color: #FFFFFF;
+            border-width: 15px;
+        }
+    }
+    .comment-list .comment-post {
+        margin-top: 6px;
+    }
+
+    .button:focus {
+        outline: 0px dotted !important;
+    }
+
+    .button-like {
+        margin-top: 10px;
+        border: 2px solid #8a8a8a;
+        background-color: transparent;
+        text-decoration: none;
+        padding: 1rem;
+        position: relative;
+        vertical-align: middle;
+        text-align: center;
+        display: inline-block;
+        border-radius: 3rem;
+        color: #8a8a8a;
+        transition: all ease 0.4s;
+    }
+
+    .button-like span {
+        margin-left: 0.5rem;
+    }
+
+    .button-like .fa,
+    .button-like span {
+        transition: all ease 0.4s;
+    }
+
+    .button-like:focus {
+        background-color: transparent;
+    }
+
+    .button-like:focus .fa,
+    .button-like:focus span {
+        color: #8a8a8a;
+    }
+
+    .button-like:hover {
+        border-color: #cc4b37;
+        background-color: transparent;
+    }
+
+    .button-like:hover .fa,
+    .button-like:hover span {
+        color: #cc4b37;
+    }
+
+    .liked {
+        background-color: #cc4b37;
+        border-color: #cc4b37;
+    }
+
+    .liked .fa,
+    .liked span {
+        color: #fefefe;
+    }
+
+    .liked:focus {
+        background-color: #cc4b37;
+    }
+
+    .liked:focus .fa,
+    .liked:focus span {
+        color: #fefefe;
+    }
+
+    .liked:hover {
+        background-color: #cc4b37;
+        border-color: #cc4b37;
+    }
+
+    .liked:hover .fa,
+    .liked:hover span {
+        color: #fefefe;
+    }
+    .img-responsive {
+        height:20px;
+    }
+
+</style>
+<script>
+    function likeFunction(x) {
+        if (x.classList.contains("liked")){
+            x.classList.remove("liked");
+        }else{
+            x.classList.add("liked");
+        }
+        $.ajax({
+            url: '../../manage_like/'+x.id+"/",
+            data: {
+            },
+            dataType: 'json',
+            success: function (data) {
+                document.getElementById(x.id+"n").innerText = data.nlikes;
+            }
+        });
+    }
+
+</script>
+{% endblock %}

@@ -18,13 +18,17 @@ urlpatterns = [
     url(r'^view_post/(?P<id>.*)/$', views.view_post, name='view_post'),
     url(r'^manage_friend/(?P<username>.*)/(?P<index>.*)/$', views.manage_friend, name='manage_complete'),
     url(r'^manage_friend/(?P<username>.*)/$', views.manage_friend, name='manage'),
+    url(r'^manage_like/(?P<id>.*)/$', views.manage_like, name='like'),
     url(r'^search_users=(?P<isProfile>.*)/searched=(?P<searched>.*)/(?P<index>.*)/$', views.search_users, name='search_users_complete'),
     url(r'^search_users=(?P<isProfile>.*)/$', views.search_users, name='search_users'),
     url(r'^profile=(?P<username>.*)/(?P<index>.*)/$', views.show_profile, name='show_profile_complete'),
     url(r'^profile=(?P<username>.*)/$', views.show_profile, name='show_profile'),
     url(r'^timeline/index=(?P<index>.*)/$', views.timeline, name='full_timeline'),
     url(r'^timeline/$', views.timeline, name='timeline'),
-    url(r'^chat/(?P<username>.*)$', views.chat, name='chat')
+    url(r'^chat/(?P<username>.*)$', views.chat, name='chat'),
+    url(r'^edit_profile/$', views.edit_profile, name='editProfile'),
+    url(r'^get_users/(?P<username>.*)/$', views.get_users, name='get_users'),
+
 
 
     #path('admin/', admin.site.urls),
